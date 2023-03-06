@@ -185,7 +185,7 @@ func TestSetBytes(t *testing.T) {
 			t.Errorf("%d: unexpected success", i)
 			continue
 		}
-		if expected := natFromBytes(tt.b).ExpandFor(m); got.Equal(expected) != yes {
+		if expected := natFromBytes(tt.b).ExpandFor(m); choice(got.Equal(expected)) != yes {
 			t.Errorf("%d: got %x, expected %x", i, got, expected)
 		}
 	}
@@ -196,7 +196,7 @@ func TestSetBytes(t *testing.T) {
 		if err != nil {
 			return false
 		}
-		return got.Equal(natFromBytes(xBytes).ExpandFor(m)) == yes
+		return choice(got.Equal(natFromBytes(xBytes).ExpandFor(m))) == yes
 	}
 
 	err := quick.Check(f, &quick.Config{})

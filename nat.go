@@ -77,7 +77,7 @@ const preallocTarget = 2048
 const preallocLimbs = (preallocTarget + _W - 1) / _W
 
 // NewNat returns a new nat with a size of zero, just like new(Nat), but with
-// the preallocated capacity to hold a number of up to preallocTarget bits.
+// the preallocated capacity to hold a number of up to 2048 bits.
 // NewNat inlines, so the allocation can live on the stack.
 func NewNat() *Nat {
 	limbs := make([]uint, 0, preallocLimbs)
@@ -237,7 +237,7 @@ func (x *Nat) setBytes(b []byte, m *Modulus) error {
 // Equal returns 1 if x == y, and 0 otherwise.
 //
 // Both operands must have the same announced length.
-func (x *Nat) Equal(y *Nat) choice {
+func (x *Nat) Equal(y *Nat) uint {
 	// Eliminate bounds checks in the loop.
 	size := len(x.limbs)
 	xLimbs := x.limbs[:size]
@@ -247,11 +247,11 @@ func (x *Nat) Equal(y *Nat) choice {
 	for i := 0; i < size; i++ {
 		equal &= ctEq(xLimbs[i], yLimbs[i])
 	}
-	return equal
+	return uint(equal)
 }
 
 // IsZero returns 1 if x == 0, and 0 otherwise.
-func (x *Nat) IsZero() choice {
+func (x *Nat) IsZero() uint {
 	// Eliminate bounds checks in the loop.
 	size := len(x.limbs)
 	xLimbs := x.limbs[:size]
@@ -260,7 +260,7 @@ func (x *Nat) IsZero() choice {
 	for i := 0; i < size; i++ {
 		zero &= ctEq(xLimbs[i], 0)
 	}
-	return zero
+	return uint(zero)
 }
 
 // cmpGeq returns 1 if x >= y, and 0 otherwise.
@@ -463,12 +463,13 @@ func (x *Nat) shiftIn(y uint, m *Modulus) *Nat {
 	return x.assign(needSubtraction, d)
 }
 
-// Mod calculates out = x mod m.
+// Mod calculates out = y mod m.
 //
-// This works regardless how large the value of x is.
+// This works regardless how large the value of y is.
 //
 // The output will be resized to the size of m and overwritten.
-func (out *Nat) Mod(x *Nat, m *Modulus) *Nat {
+func (x *Nat) Mod(y *Nat, m *Modulus) *Nat {
+	out, x := x, y
 	out.resetFor(m)
 	// Working our way from the most significant to the least significant limb,
 	// we can insert each limb at the least significant position, shifting all
@@ -494,18 +495,18 @@ func (out *Nat) Mod(x *Nat, m *Modulus) *Nat {
 	return out
 }
 
-// ExpandFor ensures out has the right size to work with operations modulo m.
+// ExpandFor ensures x has the right size to work with operations modulo m.
 //
-// The announced size of out must be smaller than or equal to that of m.
-func (out *Nat) ExpandFor(m *Modulus) *Nat {
-	return out.expand(len(m.nat.limbs))
+// The announced size of x must be smaller than or equal to that of m.
+func (x *Nat) ExpandFor(m *Modulus) *Nat {
+	return x.expand(len(m.nat.limbs))
 }
 
-// resetFor ensures out has the right size to work with operations modulo m.
+// resetFor ensures x has the right size to work with operations modulo m.
 //
-// out is zeroed and may start at any size.
-func (out *Nat) resetFor(m *Modulus) *Nat {
-	return out.reset(len(m.nat.limbs))
+// x is zeroed and may start at any size.
+func (x *Nat) resetFor(m *Modulus) *Nat {
+	return x.reset(len(m.nat.limbs))
 }
 
 // Sub computes x = x - y mod m.
@@ -654,11 +655,12 @@ func (x *Nat) Mul(y *Nat, m *Modulus) *Nat {
 	return x.montgomeryMul(xR, y, m)                  // x = xR * y / R mod m
 }
 
-// Exp calculates out = x^e mod m.
+// Exp calculates x = y^e mod m.
 //
 // The exponent e is represented in big-endian order. The output will be resized
-// to the size of m and overwritten. x must already be reduced modulo m.
-func (out *Nat) Exp(x *Nat, e []byte, m *Modulus) *Nat {
+// to the size of m and overwritten. y must already be reduced modulo m.
+func (x *Nat) Exp(y *Nat, e []byte, m *Modulus) *Nat {
+	out, x := x, y
 	// We use a 4 bit window. For our RSA workload, 4 bit windows are faster
 	// than 2 bit windows, but use an extra 12 nats worth of scratch space.
 	// Using bit sizes that don't divide 8 are more complex to implement.
