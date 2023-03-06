@@ -2,6 +2,15 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Package bigmod implements constant-time big integer arithmetic modulo large
+// odd moduli. Unlike math/big, this package is suitable for implementing
+// security-sensitive cryptographic operations. It is a re-exported version the
+// standard library package crypto/internal/bigmod used to implement crypto/rsa
+// amongst others.
+//
+// The API is NOT stable. In particular, its safety is suboptimal, as the caller
+// is responsible for ensuring that Nats are reduced modulo the Modulus they are
+// used with.
 package bigmod
 
 import (
