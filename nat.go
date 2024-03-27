@@ -85,9 +85,7 @@ func (x *Nat) expand(n int) *Nat {
 		return x
 	}
 	extraLimbs := x.limbs[len(x.limbs):n]
-	for i := range extraLimbs {
-		extraLimbs[i] = 0
-	}
+	clear(extraLimbs)
 	x.limbs = x.limbs[:n]
 	return x
 }
@@ -98,9 +96,7 @@ func (x *Nat) reset(n int) *Nat {
 		x.limbs = make([]uint, n)
 		return x
 	}
-	for i := range x.limbs {
-		x.limbs[i] = 0
-	}
+	clear(x.limbs)
 	x.limbs = x.limbs[:n]
 	return x
 }
