@@ -18,3 +18,4 @@ jobs:
       - run: GOARCH=ppc64le go test -c
       - run: GOARCH=riscv64 go test -c
       - run: GOARCH=s390x go test -c
+      - run: GOARCH=loong64 go test -c
