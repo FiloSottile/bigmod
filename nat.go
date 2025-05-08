@@ -3,14 +3,13 @@
 // license that can be found in the LICENSE file.
 
 // Package bigmod implements constant-time big integer arithmetic modulo large
-// odd moduli. Unlike math/big, this package is suitable for implementing
+// moduli. Unlike math/big, this package is suitable for implementing
 // security-sensitive cryptographic operations. It is a re-exported version the
-// standard library package crypto/internal/bigmod used to implement crypto/rsa
-// amongst others.
+// standard library package crypto/internal/fips140/bigmod used to implement
+// crypto/rsa amongst others.
 //
-// The API is NOT stable. In particular, its safety is suboptimal, as the caller
-// is responsible for ensuring that Nats are reduced modulo the Modulus they are
-// used with.
+// The API is NOT stable. The caller is responsible for ensuring that Nats are
+// reduced modulo the Modulus they are used with.
 package bigmod
 
 import (
@@ -1050,7 +1049,9 @@ func (x *Nat) Exp(y *Nat, e []byte, m *Modulus) *Nat {
 // be reduced modulo m. This leaks the exponent through timing side-channels.
 //
 // m must be odd, or ExpShortVarTime will panic.
-func (out *Nat) ExpShortVarTime(x *Nat, e uint, m *Modulus) *Nat {
+func (x *Nat) ExpShortVarTime(y *Nat, e uint, m *Modulus) *Nat {
+	out, x := x, y
+
 	if !m.odd {
 		panic("bigmod: modulus for ExpShortVarTime must be odd")
 	}
